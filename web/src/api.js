@@ -10,7 +10,7 @@ export async function api(path, { method = 'GET', body, token } = {}) {
   });
   if (!res.ok) {
     if (res.status === 401 && path.startsWith('/admin') && path !== '/admin/login') {
-      window.location.assign('/admin/login');
+      window.location.replace('/admin/login'); // replace: geri tuşu /admin'e dönüp tekrar atmasın
     }
     const e = new Error((await res.json().catch(() => ({}))).error || 'Bir şeyler ters gitti. Tekrar dene.');
     e.status = res.status;

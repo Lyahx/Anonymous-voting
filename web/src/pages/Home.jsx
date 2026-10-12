@@ -38,7 +38,7 @@ export default function Home() {
           </label>
           <button className="btn" disabled={!code.trim()}>Odaya gir</button>
         </form>
-        <p className="foot"><Link to="/admin">Yönetici girişi</Link></p>
+        <p className="foot"><Link to="/admin/login">Yönetici girişi</Link></p>
       </div>
     </main>
   );

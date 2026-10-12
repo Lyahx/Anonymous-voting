@@ -23,7 +23,6 @@ export default function Projector() {
       <section className="p-join">
         <QRCodeSVG value={joinUrl} size={512} bgColor="#E4DFD3" fgColor="#0E1118" marginSize={3} style={{ width: '100%', height: 'auto' }} />
         <CodeTiles code={room.code} className="xl" />
-        {!/localhost|127\.0\.0\.1/.test(joinUrl) && <p className="muted">{joinUrl}</p>}
       </section>
       <section className="p-poll">
         <p className="muted">{room.title}</p>
