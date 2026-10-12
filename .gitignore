@@ -1,0 +1,29 @@
+# bağımlılıklar
+node_modules/
+
+# derleme çıktısı
+web/dist/
+
+# veritabanı: oy ve seçmen kayıtları içerir, depoya girmemeli
+*.db
+*.db-shm
+*.db-wal
+*.sqlite*
+
+# ortam ve gizli bilgiler (şablon .env.example depoda kalır)
+.env
+.env.*
+!.env.example
+
+# günlükler
+*.log
+
+# araç önbellekleri ve yerel ayarlar
+.vite/
+.claude/settings.local.json
+
+# işletim sistemi ve editör
+.DS_Store
+.idea/
+.vscode/
+*.swp
