@@ -2,10 +2,13 @@
   "name": "anonim-oylama",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "dev": "ADMIN_PASSWORD=${ADMIN_PASSWORD:-dev} node --watch server/index.js & vite web --host",
     "build": "vite build web",
-    "start": "node --env-file-if-exists=.env server/index.js",
+    "start": "NODE_ENV=production node --env-file-if-exists=.env server/index.js",
     "test": "DB_FILE=:memory: node --test server/*.test.js"
   },
   "dependencies": {

@@ -19,6 +19,8 @@ const CODE_CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // 0/O, 1/I karışmaz
 
 const app = express();
 app.disable('x-powered-by');
+// Proxy arkasında (Railway vb.) gerçek istemci IP'si için: TRUST_PROXY=1. Doğrudan internete açıkken ayarlama.
+if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY));
 app.use(express.json({ limit: '20kb' }));
 
 const bad = (res, error, status = 400) => res.status(status).json({ error });
