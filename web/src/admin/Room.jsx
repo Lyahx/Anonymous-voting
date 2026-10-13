@@ -5,7 +5,7 @@ import { api, TYPES, useLive } from '../api.js';
 import Results from '../Results.jsx';
 import { CodeTiles, KineticText, swatch } from '../fx.jsx';
 
-const STATUS = { draft: 'Henüz açılmadı', open: 'Açık', closed: 'Kapalı' };
+const STATUS = { draft: 'Henüz açılmadı', open: 'Açık', closed: 'Kapalı', revealed: 'Birinci projeksiyonda' };
 
 export default function AdminRoom() {
   const { id } = useParams();
@@ -91,7 +91,11 @@ export default function AdminRoom() {
           <footer className="actions">
             {p.status === 'open'
               ? <button className="btn" onClick={() => setStatus(p, 'closed')}>Oylamayı bitir</button>
-              : <button className="btn" onClick={() => setStatus(p, 'open')}>{p.status === 'closed' ? 'Yeniden aç' : 'Oylamayı başlat'}</button>}
+              : <button className="btn" onClick={() => setStatus(p, 'open')}>{p.status === 'draft' ? 'Oylamayı başlat' : 'Yeniden aç'}</button>}
+            {p.status === 'closed' && (
+              <button className="btn" disabled={p.result.total === 0} onClick={() => setStatus(p, 'revealed')}>Birinciyi göster</button>
+            )}
+            {p.status === 'revealed' && <button className="btn ghost" onClick={() => setStatus(p, 'closed')}>Gizle</button>}
             <button className="btn ghost danger" onClick={() => remove(p)}>Sil</button>
           </footer>
         </article>

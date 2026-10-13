@@ -2,8 +2,20 @@ import { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { api, useLive } from '../api.js';
-import Results from '../Results.jsx';
 import { CodeTiles, KineticText } from '../fx.jsx';
+
+// Yalnız birinci: oy sayısı ve yüzde yok. Puan sorusunda "birinci" olmadığı için ortalama gösterilir.
+function Winner({ result: { labels, values, average } }) {
+  if (average != null) return <KineticText as="h2" text={`Ortalama ${average.toFixed(1)}`} />;
+  const top = Math.max(...values);
+  const names = labels.filter((_, i) => values[i] === top);
+  return (
+    <>
+      {names.length > 1 && <p className="muted">Berabere</p>}
+      {names.map((n) => <KineticText key={n} as="h2" text={n} />)}
+    </>
+  );
+}
 
 export default function Projector() {
   const { id } = useParams();
@@ -15,7 +27,7 @@ export default function Projector() {
   const { room, polls, voters, publicUrl } = data;
   const joinUrl = `${publicUrl || location.origin}/r/${room.code}`;
   const open = polls.find((p) => p.status === 'open');
-  const last = [...polls].reverse().find((p) => p.status === 'closed');
+  const last = [...polls].reverse().find((p) => p.status === 'closed' || p.status === 'revealed');
   const shown = open ?? last;
 
   return (
@@ -29,10 +41,13 @@ export default function Projector() {
         {shown ? (
           <>
             <KineticText key={shown.id} text={shown.question} />
-            <Results type={shown.type} result={shown.result} />
-            <p className="muted">
-              {open ? `${shown.result.total} / ${voters} katılımcı oy verdi` : 'Oylama bitti'}
-            </p>
+            {shown.status === 'revealed' ? (
+              <Winner result={shown.result} />
+            ) : (
+              <p className="muted">
+                {open ? `${shown.result.total} / ${voters} katılımcı oy verdi` : 'Oylama bitti'}
+              </p>
+            )}
           </>
         ) : (
           <h1>{voters} katılımcı bağlandı. Oylama başlamak üzere.</h1>

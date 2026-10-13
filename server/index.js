@@ -92,7 +92,7 @@ app.get('/api/rooms/:code/state', (req, res) => {
     title: room.title,
     poll: open && { id: open.id, type: open.type, question: open.question, options: open.options, max_n: open.max_n },
     voted: open ? !!db.prepare('SELECT 1 FROM receipts WHERE poll_id = ? AND token_hash = ?').get(open.id, th) : false,
-    closed: polls.filter((p) => p.status === 'closed').reverse()
+    closed: polls.filter((p) => p.status === 'closed' || p.status === 'revealed').reverse()
       .map((p) => ({ id: p.id, type: p.type, question: p.question, result: result(p) })),
   });
 });
@@ -223,7 +223,9 @@ app.post('/api/admin/polls/:id/status', (req, res) => {
   const poll = pollRow(req.params.id);
   const status = req.body?.status;
   if (!poll) return bad(res, 'Soru bulunamadı.', 404);
-  if (!['open', 'closed'].includes(status)) return bad(res, 'Durum geçersiz.');
+  if (!['open', 'closed', 'revealed'].includes(status)) return bad(res, 'Durum geçersiz.');
+  // revealed = kapalı + projeksiyonda birinci gösteriliyor; yalnız kapalı sorudan geçilir.
+  if (status === 'revealed' && !['closed', 'revealed'].includes(poll.status)) return bad(res, 'Önce oylamayı bitir.', 409);
   tx(() => {
     // Odada aynı anda tek soru açık: yenisi açılınca öncekini kapat.
     if (status === 'open') db.prepare("UPDATE polls SET status = 'closed' WHERE room_id = ? AND status = 'open'").run(poll.room_id);
