@@ -12,6 +12,7 @@
   --c4: #3fe0a5; /* nane */
   --c5: #ff5fa8; /* pembe */
   --c6: #4cc9ff; /* gökyüzü */
+  --gold: #ffcf4a;
   --accent: var(--c1);
   --on-accent: #0e1118;
   --danger: #ff8a85;
@@ -342,10 +343,42 @@ input:focus-visible + .tick { outline: 2px solid var(--stamp); outline-offset: 3
 .p-join { align-self: center; container-type: inline-size; }
 .p-join > svg { border-radius: 14px; transform: rotate(-2deg); box-shadow: 0 30px 70px rgb(0 0 0 / 0.5); }
 .p-poll h1 { font-size: clamp(2.4rem, 5vw, 5rem); margin-bottom: 0.5em; }
-.p-poll h2 { font-size: clamp(3rem, 7vw, 7rem); margin: 0 0 0.3em; color: var(--c1); }
 .p-poll .results { margin-bottom: 1em; }
 .p-poll .r-track { height: 1.05em; }
 .p-poll .r-value { font-size: 1.2em; }
+
+/* seçenekler sayısız listelenir; birinci altın çerçeve, parlama ve büyüme ile öne çıkar, berabere kalanlar sallanır */
+.podium { list-style: none; margin: 0 0 1em; padding: 0; display: grid; gap: 0.5em; }
+.podium li {
+  display: flex; align-items: center; gap: 0.7em; padding: 0.35em 0.8em; border-left: 0.3em solid var(--c);
+  border-radius: 8px; background: rgb(255 255 255 / 0.05); font: 600 1.3em var(--sans); overflow-wrap: anywhere;
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+.podium.done li:not(.win, .tie) { opacity: 0.35; transform: scale(0.97); }
+.podium li.win {
+  border-color: var(--gold); background: color-mix(in srgb, var(--gold) 18%, transparent);
+  box-shadow: 0 0 40px -8px var(--gold); animation: win-pop 900ms var(--ease) both;
+}
+.podium li.tie {
+  border-color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent);
+  animation: tie-sway 1.8s ease-in-out infinite;
+}
+.podium li.tie:nth-child(even) { animation-direction: reverse; }
+.p-name { flex: 1; }
+.p-tie { margin: 0; font: 800 1.1em var(--sans); letter-spacing: 0.2em; color: var(--gold); }
+.podium-avg {
+  margin: 0 0 0.5em; font: 800 clamp(2rem, 4vw, 4rem) var(--sans); color: var(--gold); transform-origin: left;
+  text-shadow: 0 0 40px color-mix(in srgb, var(--gold) 60%, transparent); animation: win-pop 900ms var(--ease) both;
+}
+.podium li.win { position: relative; overflow: hidden; }
+.podium li.win::after {
+  content: ''; position: absolute; inset: 0; transform: translateX(-120%); pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.22) 50%, transparent 65%);
+  animation: shine 2.6s 0.9s ease-in-out infinite;
+}
+@keyframes win-pop { 0% { transform: scale(0.94); } 55% { transform: scale(1.08); } 100% { transform: scale(1.04); } }
+@keyframes tie-sway { 0%, 100% { transform: translateX(-0.35em) scale(1.02); } 50% { transform: translateX(0.35em) scale(1.02); } }
+@keyframes shine { 0%, 50% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
 
 @media (max-width: 720px) {
   .projector { grid-template-columns: 1fr; grid-template-rows: none; align-content: center; row-gap: 6vw; }
@@ -369,7 +402,8 @@ input:focus-visible + .tick { outline: 2px solid var(--stamp); outline-offset: 3
 
 @media (prefers-reduced-motion: reduce) {
   .ambient i, .slip > div, .radar i, .seal-ring, .chip.open::before { animation: none; }
-  .page, .k-ch, .tiles b, .room-list li, .poll, .seal, .r-fill { animation: none; }
+  .page, .k-ch, .tiles b, .room-list li, .poll, .seal, .r-fill, .podium li, .podium li::after, .podium-avg { animation: none; }
+  .podium li.win::after { display: none; }
   .seal-check { animation: none; stroke-dashoffset: 0; }
   .paper.drop { animation: none; opacity: 0; transition: opacity 150ms; }
   .btn::before, .mark::before, .r-fill { transition: none; }

@@ -1,7 +1,7 @@
 // DB_FILE=:memory: ile çalışır (npm test).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validate, tally } from './results.js';
+import { validate, tally, podium } from './results.js';
 import { db, castVote, result, toPoll } from './db.js';
 
 const opts = ['A', 'B', 'C'];
@@ -56,4 +56,10 @@ test('oy: tekrar oy reddedilir, ballots hiçbir kimlik tutmaz', () => {
   assert.deepEqual(cols.sort(), ['id', 'payload', 'poll_id']);
   const dump = JSON.stringify(db.prepare('SELECT * FROM ballots').all());
   assert.ok(!dump.includes('hash-ali') && !dump.includes('hash-veli'));
+});
+
+test('podium: yalnız birincileri verir, sayı sızdırmaz', () => {
+  assert.deepEqual(podium(tally({ type: 'single', options: opts, max_n: 1 }, [1, 1, 0])), { winners: ['B'] });
+  assert.deepEqual(podium(tally({ type: 'single', options: opts, max_n: 1 }, [0, 1])), { winners: ['A', 'B'] });
+  assert.deepEqual(podium(tally({ type: 'rating', options: [], max_n: 5 }, [4, 5])), { average: 4.5 });
 });

@@ -2,7 +2,6 @@ import { useCallback, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, store, useLive } from '../api.js';
 import Ballot from './Ballot.jsx';
-import Results from '../Results.jsx';
 import { KineticText } from '../fx.jsx';
 
 // Oy alındı mührü: yuvaya düşen pusulanın ardından çarpar, halkadaki yazı döner.
@@ -68,10 +67,10 @@ export default function Room() {
         <section className="notice done">
           <Seal />
           <KineticText as="h1" text="Oyun alındı" />
-          <p>Sonuçlar soru kapanınca bu sayfada görünür.</p>
+          <p>Birinci açıklanınca bu sayfada görünür.</p>
         </section>
       )}
-      {!poll && (
+      {!poll && closed.length === 0 && (
         <section className="notice wait">
           <div className="radar" aria-hidden="true"><i /><i /><i /></div>
           <KineticText as="h1" text="Açık soru yok" wave />
@@ -85,7 +84,20 @@ export default function Room() {
           {closed.map((p) => (
             <article key={p.id} className="closed-poll">
               <h3>{p.question}</h3>
-              <Results type={p.type} result={p.result} />
+              {p.average != null ? (
+                <p className="podium-avg">Ortalama {p.average.toFixed(1)}</p>
+              ) : (
+                <>
+                  <ul className="podium">
+                    {p.winners.map((w, i) => (
+                      <li key={i} className={p.winners.length > 1 ? 'tie' : 'win'}>
+                        <span className="p-name">{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {p.winners.length > 1 && <p className="p-tie">Berabere</p>}
+                </>
+              )}
             </article>
           ))}
         </section>

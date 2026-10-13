@@ -2,17 +2,28 @@ import { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { api, useLive } from '../api.js';
-import { CodeTiles, KineticText } from '../fx.jsx';
+import { CodeTiles, KineticText, swatch } from '../fx.jsx';
 
-// Yalnız birinci: oy sayısı ve yüzde yok. Puan sorusunda "birinci" olmadığı için ortalama gösterilir.
-function Winner({ result: { labels, values, average } }) {
-  if (average != null) return <KineticText as="h2" text={`Ortalama ${average.toFixed(1)}`} />;
+// Oy sayısı ve yüzde hiç gösterilmez. Birinci (berabere ise hepsi) yalnız "revealed" olunca öne çıkar.
+// Puan sorusunda "birinci" olmadığı için ortalama öne çıkar.
+function Podium({ poll: { type, status, result: { labels, values, average } } }) {
+  const revealed = status === 'revealed';
+  if (type === 'rating') {
+    return revealed && average != null && <p className="podium-avg">Ortalama {average.toFixed(1)}</p>;
+  }
   const top = Math.max(...values);
-  const names = labels.filter((_, i) => values[i] === top);
+  const wins = revealed ? values.map((v) => v === top) : [];
+  const tie = wins.filter(Boolean).length > 1;
   return (
     <>
-      {names.length > 1 && <p className="muted">Berabere</p>}
-      {names.map((n) => <KineticText key={n} as="h2" text={n} />)}
+      <ul className={`podium${revealed ? ' done' : ''}`}>
+        {labels.map((label, i) => (
+          <li key={i} className={wins[i] ? (tie ? 'tie' : 'win') : ''} style={{ '--c': swatch(i) }}>
+            <span className="p-name">{label}</span>
+          </li>
+        ))}
+      </ul>
+      {tie && <p className="p-tie">Berabere</p>}
     </>
   );
 }
@@ -41,9 +52,8 @@ export default function Projector() {
         {shown ? (
           <>
             <KineticText key={shown.id} text={shown.question} />
-            {shown.status === 'revealed' ? (
-              <Winner result={shown.result} />
-            ) : (
+            <Podium poll={shown} />
+            {shown.status !== 'revealed' && (
               <p className="muted">
                 {open ? `${shown.result.total} / ${voters} katılımcı oy verdi` : 'Oylama bitti'}
               </p>

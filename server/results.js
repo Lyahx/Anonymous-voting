@@ -14,6 +14,13 @@ export function validate({ type, options, max_n }, p) {
   }
 }
 
+// Seçmen ekranına sayı sızmasın diye yalnız birincileri verir: berabere ise hepsi, puan sorusunda ortalama.
+export function podium({ labels, values, average }) {
+  if (average != null) return { average };
+  const top = Math.max(...values);
+  return { winners: labels.filter((_, i) => values[i] === top) };
+}
+
 // ranked: Borda sayımı (ilk sıra n-1 puan, son sıra 0).
 export function tally({ type, options, max_n }, payloads) {
   const total = payloads.length;

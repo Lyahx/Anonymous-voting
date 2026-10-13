@@ -3,7 +3,7 @@ import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from 
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { db, tx, toPoll, pollsOf, result, castVote } from './db.js';
-import { validate } from './results.js';
+import { validate, podium } from './results.js';
 
 const PORT = process.env.PORT || 3001;
 const PASSWORD = process.env.ADMIN_PASSWORD;
@@ -92,8 +92,9 @@ app.get('/api/rooms/:code/state', (req, res) => {
     title: room.title,
     poll: open && { id: open.id, type: open.type, question: open.question, options: open.options, max_n: open.max_n },
     voted: open ? !!db.prepare('SELECT 1 FROM receipts WHERE poll_id = ? AND token_hash = ?').get(open.id, th) : false,
-    closed: polls.filter((p) => p.status === 'closed' || p.status === 'revealed').reverse()
-      .map((p) => ({ id: p.id, type: p.type, question: p.question, result: result(p) })),
+    // Yalnız yönetici "birinciyi göster" deyince ve sayısız: projeksiyondaki sürpriz telefondan bozulmasın.
+    closed: polls.filter((p) => p.status === 'revealed').reverse()
+      .map((p) => ({ id: p.id, question: p.question, ...podium(result(p)) })),
   });
 });
 
